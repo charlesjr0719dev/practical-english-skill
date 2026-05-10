@@ -116,24 +116,73 @@ function playAudio(name) {
 - 速度控制：`currentAudio.playbackRate = parseFloat(speed)`
 
 ### 語音辨識（口說 Tab）
+
+**重要：SpeechRecognition 必須只建立一次實例（singleton），不可每次 startRecording 都 new 一個新的。**
+在 `file://` 或 `localhost` 開啟時，每次 new 都會觸發 Chrome 重問麥克風權限。
+
 ```javascript
-// 開始錄音
-function startRecording(round) {
+// ===== 語音辨識：singleton 模式 =====
+let recognition = null;
+
+function getRecognition() {
+  if (recognition) return recognition;
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) { alert('此瀏覽器不支援語音辨識，請使用 Chrome。'); return null; }
   recognition = new SpeechRecognition();
   recognition.lang = 'en-US';
-  recognition.interimResults = true;  // 即時顯示
-  recognition.continuous = true;      // 持續聽
-  // 顯示 stop 按鈕，隱藏 mic 按鈕
-  // onresult: 即時更新文字
-  // onerror: 顯示具體錯誤（not-allowed/no-speech/network/audio-capture）
+  recognition.interimResults = true;
+  recognition.continuous = true;
+  return recognition;
 }
 
-// 停止錄音
+// 開始錄音（每輪更新 callback，重用同一實例）
+async function startRecording(round) {
+  const rec = getRecognition();
+  if (!rec) return;
+  try { rec.stop(); } catch(e) {}  // 停上一輪，不 null 掉
+
+  // 更新 UI
+  document.getElementById('mic-' + round).style.display = 'none';
+  document.getElementById('stop-' + round).classList.add('visible');
+  const textEl = document.getElementById('recognized-' + round);
+  textEl.textContent = '聆聽中...';
+  textEl.classList.remove('has-text');
+
+  // onresult 必須從 i=0 累積所有結果（不是從 e.resultIndex）
+  rec.onresult = (e) => {
+    let finalText = '', interimText = '';
+    for (let i = 0; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalText += e.results[i][0].transcript + ' ';
+      else interimText += e.results[i][0].transcript;
+    }
+    const combined = (finalText + interimText).trim();
+    textEl.textContent = combined || '聆聽中...';
+    textEl.classList.toggle('has-text', !!combined);
+    recognizedTexts[round] = finalText.trim() || combined;
+  };
+
+  rec.onerror = (e) => {
+    if (e.error === 'aborted') return;
+    textEl.textContent = `錯誤：${e.error}`;
+    stopRecording(round);
+  };
+
+  setTimeout(() => { try { rec.start(); } catch(e) {} }, 100);
+}
+
+// 停止錄音（不 null recognition，保留實例）
 function stopRecording(round) {
-  if (recognition) recognition.stop();
+  try { recognition && recognition.stop(); } catch(e) {}
+  document.getElementById('mic-' + round).style.display = '';
+  document.getElementById('mic-' + round).classList.remove('recording');
+  document.getElementById('stop-' + round).classList.remove('visible');
+  if (recognizedTexts[round] && recognizedTexts[round].trim()) {
+    document.getElementById('speak-submit-' + round).classList.add('visible');
+  }
 }
 ```
+
+**retryTab('speaking') 時**：只呼叫 `recognition.stop()`，不要把 `recognition` 設為 null。
 
 ### OpenAI API 呼叫（口說回饋）
 ```javascript

@@ -31,6 +31,22 @@ python3 -c "import edge_tts" 2>/dev/null && echo "OK" || echo "NEED_INSTALL"
 
 - `進度追蹤.md`：記錄路徑設定與輪替進度
 - `複習與學習成果檢視.html`：從 `references/review-page.html` 複製
+- 啟動本地伺服器的捷徑檔（路徑換成使用者設定的路徑）：
+  - **Windows** → `啟動練習.bat`：
+    ```bat
+    @echo off
+    echo 啟動 Practical English 本地伺服器...
+    start http://localhost:7788
+    python -m http.server 7788 --directory "使用者路徑"
+    ```
+  - **Mac** → `啟動練習.sh`（建立後執行 `chmod +x 啟動練習.sh`）：
+    ```bash
+    #!/bin/bash
+    open http://localhost:7788
+    python3 -m http.server 7788 --directory "使用者路徑"
+    ```
+  **重要**：必須用 localhost 開啟，直接雙擊 html 以 `file://` 開啟時 Chrome 每次都會重問麥克風權限。
+- `index.html`：練習首頁，含折疊式輪次清單。每次生成新練習後必須更新此檔，在對應輪次的 `round-body` 內新增 `lesson-card`，並更新 `updateRoundProgress` 的 peIds 陣列。新輪次開始時新增對應的 `round-section` HTML 區塊（預設收合：header 不加 `open` class，body 不加 `open` class）。
 
 ### 4. 顯示使用說明
 
