@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>複習與學習成果檢視 — Practical English</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f7f7f7;
+  --border: #e5e5e5;
+  --text: #3c3c3c;
+  --text-dim: #777777;
+  --accent: #1cb0f6;
+  --accent-2: #ce82ff;
+  --success: #58cc02;
+  --success-dark: #46a302;
+  --success-light: #d7ffb8;
+  --warn: #ff9600;
+  --danger: #ea2b2b;
+  --info-light: #e8f4fd;
+  --purple-light: #f3e8ff;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Nunito Sans', -apple-system, "PingFang TC", sans-serif;
+  font-size: 17px;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  background: var(--bg);
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+h2 { font-size: 20px; font-weight: 800; margin-bottom: 16px; }
+.subtitle { color: var(--text-dim); font-size: 14px; margin-bottom: 20px; }
+
+/* Tabs */
+.tab-bar {
+  display: flex;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 24px;
+}
+.tab {
+  padding: 12px 24px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab:hover:not(.active) { color: var(--text); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ===== Star Map ===== */
+.star-map-container {
+  overflow-x: auto;
+  margin-bottom: 24px;
+}
+.star-map {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  min-width: 700px;
+}
+.star-map th {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  padding: 6px 4px;
+  text-align: center;
+  white-space: nowrap;
+}
+.star-map th.category-label {
+  font-size: 13px;
+  color: var(--text);
+}
+.star-map td {
+  text-align: center;
+  padding: 8px 4px;
+  font-size: 20px;
+}
+.star-map td.round-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-align: right;
+  padding-right: 12px;
+  white-space: nowrap;
+}
+.star-cell {
+  width: 56px;
+  padding: 6px 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  transition: all 0.2s;
+  font-size: 14px;
+}
+.star-cell.all-done {
+  background: var(--success-light);
+}
+.mini-star { color: var(--border); }
+.mini-star.done { color: var(--warn); }
+
+.map-legend {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+.map-legend span { display: flex; align-items: center; gap: 6px; }
+
+.map-stats {
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  gap: 32px;
+  font-size: 15px;
+}
+.map-stats .stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--success);
+}
+.map-stats .stat-label {
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+/* ===== Collection Tab ===== */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.filter-btn {
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  background: white;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+.filter-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.collection-list { list-style: none; }
+
+.collection-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  transition: all 0.15s;
+}
+.collection-item:hover { border-color: var(--accent); }
+
+.collection-play {
+  background: var(--accent);
+  color: white;
+  border: none;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 3px 0 #1899d6;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.collection-play:hover { transform: translateY(1px); box-shadow: 0 2px 0 #1899d6; }
+.collection-play:active { transform: translateY(3px); box-shadow: none; }
+
+.collection-text {
+  flex: 1;
+  min-width: 0;
+}
+.collection-en {
+  font-weight: 700;
+  font-size: 16px;
+}
+.collection-zh {
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+.collection-tag {
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.collection-unstar {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--warn);
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+.collection-unstar:hover { transform: scale(1.2); }
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-dim);
+}
+.empty-state .empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+.empty-state p {
+  font-size: 15px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.collection-count {
+  color: var(--text-dim);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+</style>
+</head>
+<body>
+
+<h1>複習與學習成果檢視</h1>
+<p class="subtitle">Practical English</p>
+
+<div class="tab-bar">
+  <button class="tab active" onclick="switchTab('progress')">⭐ 學習成果</button>
+  <button class="tab" onclick="switchTab('collection')">📚 收藏複習</button>
+</div>
+
+<!-- ===== Tab 1: Star Map ===== -->
+<div class="tab-content active" id="tab-progress">
+  <h2>星星地圖</h2>
+
+  <div class="map-legend">
+    <span>每格 3 顆星：</span>
+    <span><span class="mini-star done">⭐</span> 會話</span>
+    <span><span class="mini-star done">⭐</span> 聽解</span>
+    <span><span class="mini-star done">⭐</span> 口說</span>
+    <span style="margin-left:8px;"><span class="mini-star">☆</span> 未完成</span>
+  </div>
+
+  <div class="star-map-container">
+    <table class="star-map" id="star-map-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th class="category-label">W1<br><span style="font-weight:400;font-size:11px;">簡報</span></th>
+          <th class="category-label">W2<br><span style="font-weight:400;font-size:11px;">會議</span></th>
+          <th class="category-label">W3<br><span style="font-weight:400;font-size:11px;">接待</span></th>
+          <th class="category-label">W4<br><span style="font-weight:400;font-size:11px;">電話</span></th>
+          <th class="category-label">T1<br><span style="font-weight:400;font-size:11px;">產業</span></th>
+          <th class="category-label">W5<br><span style="font-weight:400;font-size:11px;">談判</span></th>
+          <th class="category-label">W6<br><span style="font-weight:400;font-size:11px;">展會</span></th>
+          <th class="category-label">P1<br><span style="font-weight:400;font-size:11px;">出差</span></th>
+          <th class="category-label">P2<br><span style="font-weight:400;font-size:11px;">社交</span></th>
+          <th class="category-label">T2<br><span style="font-weight:400;font-size:11px;">AI</span></th>
+          <th class="category-label">P3<br><span style="font-weight:400;font-size:11px;">生活</span></th>
+          <th class="category-label">P4<br><span style="font-weight:400;font-size:11px;">資訊</span></th>
+        </tr>
+      </thead>
+      <tbody id="star-map-body"></tbody>
+    </table>
+  </div>
+
+  <div class="map-stats" id="map-stats">
+    <div>
+      <div class="stat-value" id="stat-completed">0</div>
+      <div class="stat-label">已獲得星星</div>
+    </div>
+    <div>
+      <div class="stat-value" id="stat-rounds">0</div>
+      <div class="stat-label">完成輪數</div>
+    </div>
+    <div>
+      <div class="stat-value" id="stat-stars">0</div>
+      <div class="stat-label">收藏句型</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Tab 2: Collection ===== -->
+<div class="tab-content" id="tab-collection">
+  <h2>收藏複習</h2>
+
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" onclick="filterCollection('all')">全部</button>
+    <button class="filter-btn" onclick="filterCollection('會話')">會話</button>
+    <button class="filter-btn" onclick="filterCollection('會話-句型')">會話句型</button>
+    <button class="filter-btn" onclick="filterCollection('聽解-用語')">聽解用語</button>
+    <button class="filter-btn" onclick="filterCollection('口說-替代')">口說替代</button>
+  </div>
+
+  <div class="collection-count" id="collection-count"></div>
+  <ul class="collection-list" id="collection-list"></ul>
+  <div class="empty-state" id="empty-state" style="display:none;">
+    <div class="empty-icon">☆</div>
+    <p>還沒有收藏任何句型。<br>在練習中按 ☆ 就可以把喜歡的句型收藏到這裡。</p>
+  </div>
+</div>
+
+<script>
+// ===== Tab switching =====
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const idx = tab === 'progress' ? 0 : 1;
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+}
+
+// ===== Star Map =====
+const CATEGORIES = ['W1','W2','W3','W4','T1','W5','W6','P1','P2','T2','P3','P4'];
+const CAT_ORDER = {
+  'W1':0,'W2':1,'W3':2,'W4':3,'T1':4,'W5':5,'W6':6,'P1':7,'P2':8,'T2':9,'P3':10,'P4':11
+};
+
+function renderStarMap() {
+  const progress = JSON.parse(localStorage.getItem('pe_progress') || '{}');
+  const TAB_KEYS = ['conversation', 'listening', 'speaking'];
+
+  const roundData = {};
+  let maxRound = 0;
+  Object.entries(progress).forEach(([peId, info]) => {
+    const num = parseInt(peId.replace('PE-', ''));
+    const round = Math.ceil(num / 12);
+    const catIndex = (num - 1) % 12;
+    if (round > maxRound) maxRound = round;
+    if (!roundData[round]) roundData[round] = {};
+    const tabs = info.tabs || {};
+    roundData[round][catIndex] = {
+      conversation: !!tabs.conversation,
+      listening: !!tabs.listening,
+      speaking: !!tabs.speaking,
+    };
+  });
+
+  const displayRounds = Math.max(maxRound + 1, 3);
+  const tbody = document.getElementById('star-map-body');
+  tbody.innerHTML = '';
+
+  let totalStars = 0;
+  let completedRounds = 0;
+
+  for (let r = 1; r <= displayRounds; r++) {
+    const tr = document.createElement('tr');
+    const tdLabel = document.createElement('td');
+    tdLabel.className = 'round-label';
+    tdLabel.textContent = `第 ${r} 輪`;
+    tr.appendChild(tdLabel);
+
+    let roundStars = 0;
+    for (let c = 0; c < 12; c++) {
+      const td = document.createElement('td');
+      const data = roundData[r] && roundData[r][c];
+      const conv = data ? data.conversation : false;
+      const list = data ? data.listening : false;
+      const speak = data ? data.speaking : false;
+      const count = (conv ? 1 : 0) + (list ? 1 : 0) + (speak ? 1 : 0);
+      totalStars += count;
+      roundStars += count;
+      const allDone = count === 3;
+      td.innerHTML = `<span class="star-cell${allDone ? ' all-done' : ''}">` +
+        `<span class="mini-star${conv ? ' done' : ''}">${conv ? '⭐' : '☆'}</span>` +
+        `<span class="mini-star${list ? ' done' : ''}">${list ? '⭐' : '☆'}</span>` +
+        `<span class="mini-star${speak ? ' done' : ''}">${speak ? '⭐' : '☆'}</span>` +
+        `</span>`;
+      tr.appendChild(td);
+    }
+    if (roundStars === 36) completedRounds++;
+    tbody.appendChild(tr);
+  }
+
+  document.getElementById('stat-completed').textContent = totalStars;
+  document.getElementById('stat-rounds').textContent = completedRounds;
+  const stars = JSON.parse(localStorage.getItem('pe_stars') || '[]');
+  document.getElementById('stat-stars').textContent = stars.length;
+}
+
+// ===== Collection =====
+let currentFilter = 'all';
+
+function renderCollection() {
+  const stars = JSON.parse(localStorage.getItem('pe_stars') || '[]');
+  const list = document.getElementById('collection-list');
+  const emptyState = document.getElementById('empty-state');
+  const countEl = document.getElementById('collection-count');
+
+  const filtered = currentFilter === 'all'
+    ? stars
+    : stars.filter(s => s.tab === currentFilter);
+
+  if (filtered.length === 0) {
+    list.innerHTML = '';
+    emptyState.style.display = 'block';
+    countEl.textContent = '';
+    return;
+  }
+
+  emptyState.style.display = 'none';
+  countEl.textContent = `共 ${filtered.length} 筆收藏`;
+
+  list.innerHTML = filtered.map((item, idx) => `
+    <li class="collection-item" data-index="${idx}">
+      <button class="collection-play" onclick="speakText('${item.english.replace(/'/g, "\\'")}')">▶</button>
+      <div class="collection-text">
+        <div class="collection-en">${item.english}</div>
+        <div class="collection-zh">${item.chinese}</div>
+      </div>
+      <span class="collection-tag">${item.source} ${item.tab}</span>
+      <button class="collection-unstar" onclick="removeStar('${item.english.replace(/'/g, "\\'")}', '${item.source}')" title="取消收藏">⭐</button>
+    </li>
+  `).join('');
+}
+
+function filterCollection(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent === {
+      'all': '全部', '會話': '會話', '會話-句型': '會話句型', '聽解-用語': '聽解用語', '口說-替代': '口說替代'
+    }[filter]);
+  });
+  renderCollection();
+}
+
+function removeStar(english, source) {
+  const stars = JSON.parse(localStorage.getItem('pe_stars') || '[]');
+  const idx = stars.findIndex(s => s.english === english && s.source === source);
+  if (idx >= 0) {
+    stars.splice(idx, 1);
+    localStorage.setItem('pe_stars', JSON.stringify(stars));
+    renderCollection();
+    document.getElementById('stat-stars').textContent = stars.length;
+  }
+}
+
+function speakText(text) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'en-US';
+    utter.rate = 0.9;
+    window.speechSynthesis.speak(utter);
+  }
+}
+
+// ===== Dynamic filter buttons from actual data =====
+function updateFilterButtons() {
+  const stars = JSON.parse(localStorage.getItem('pe_stars') || '[]');
+  const sources = [...new Set(stars.map(s => s.source))].sort();
+  const bar = document.getElementById('filter-bar');
+
+  document.querySelectorAll('.filter-btn.source-filter').forEach(el => el.remove());
+
+  if (sources.length > 1) {
+    sources.forEach(src => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-btn source-filter';
+      btn.textContent = src;
+      btn.onclick = () => {
+        currentFilter = 'source:' + src;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const starsData = JSON.parse(localStorage.getItem('pe_stars') || '[]');
+        const filtered = starsData.filter(s => s.source === src);
+        const list = document.getElementById('collection-list');
+        const emptyState = document.getElementById('empty-state');
+        const countEl = document.getElementById('collection-count');
+        emptyState.style.display = 'none';
+        countEl.textContent = `共 ${filtered.length} 筆收藏`;
+        list.innerHTML = filtered.map((item, idx) => `
+          <li class="collection-item">
+            <button class="collection-play" onclick="speakText('${item.english.replace(/'/g, "\\'")}')">▶</button>
+            <div class="collection-text">
+              <div class="collection-en">${item.english}</div>
+              <div class="collection-zh">${item.chinese}</div>
+            </div>
+            <span class="collection-tag">${item.source} ${item.tab}</span>
+            <button class="collection-unstar" onclick="removeStar('${item.english.replace(/'/g, "\\'")}', '${item.source}')" title="取消收藏">⭐</button>
+          </li>
+        `).join('');
+      };
+      bar.appendChild(btn);
+    });
+  }
+}
+
+// ===== Init =====
+window.addEventListener('load', () => {
+  renderStarMap();
+  updateFilterButtons();
+  renderCollection();
+});
+</script>
+</body>
+</html>
