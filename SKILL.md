@@ -50,31 +50,32 @@ python3 -c "import edge_tts" 2>/dev/null && echo "OK" || echo "NEED_INSTALL"
   **重要**：必須用 localhost 開啟，直接雙擊 html 以 `file://` 開啟時 Chrome 每次都會重問麥克風權限。
 - `index.html`：練習首頁。**版本控制機制**：
   
-  **當前版本：2**（含 type cards 動態解鎖 + LESSONS 常數驅動星星地圖 + 統計條）
+  **當前版本：3**（v3：移除星星系統、純靜態首頁、無 JavaScript）
   
   **每次生成新練習前，先檢查 index.html 版本**：
   1. 讀 index.html 第二行，找 `<!-- pe-index-version: N -->`
-  2. 如果**沒有版本號**或**版本 < 2**：整頁重建（從 `references/index-template.md` 的規格重新生成），掃描已存在的 `PE-XXX/` 資料夾來重建 `LESSONS` 常數和 lesson cards
-  3. 如果**版本 = 2**（最新）：只做增量更新
+  2. 如果**沒有版本號**或**版本 < 3**：整頁重建 + 舊課程升級
+  3. 如果**版本 = 3**（最新）：只做增量更新
 
   **增量更新步驟**：
-  1. 在練習列表區新增 `lesson-card`（含課程連結、類型 emoji、星數）
-  2. **更新 `<script>` 區塊裡的 `LESSONS` 常數**，加入新課程的 types 陣列。例如：
-     ```javascript
-     const LESSONS = {
-       'PE-001': { types: ['reading'] },
-       'PE-002': { types: ['reading', 'conversation', 'listening', 'speaking'] },
-       'PE-003': { types: ['reading', 'conversation'] },  // ← 新增這行
-     };
-     ```
-     星星地圖和 type cards 解鎖狀態都從這個常數動態算出，不依賴 localStorage。
-  
+  1. 在練習列表區新增 `lesson-card`（含課程連結、類型 emoji）
+
   **整頁重建步驟**（版本過舊時）：
   1. 用 `ls` 掃描資料夾內所有 `PE-XXX/` 子目錄
   2. 讀每個 `PE-XXX/*.html` 的 tab-bar，判斷該課包含哪些類型
-  3. 用掃描結果生成完整的 `LESSONS` 常數 + lesson cards
-  4. 生成完整的 v2 index.html（含 type cards、動態星星地圖、統計條、version 標記）
-  5. 舊的 index.html 會被完全取代
+  3. 生成完整的 v3 index.html（純靜態、無星星、無 JavaScript）
+  4. 舊的 index.html 會被完全取代
+  5. **同時執行舊課程升級**（見下方）
+
+  **舊課程自動升級**（版本重建時一併執行）：
+  掃描所有 `PE-XXX/*.html`，對每個檔案檢查並修補：
+  1. **速度選單**：如果 `<select>` 裡沒有 `0.25` 選項，在每個 speed-select 的 `<option value="0.7">` 前面插入 `<option value="0.25">0.25x</option>` 和 `<option value="0.5">0.5x</option>`
+  2. **會話 Tab 速度控制**：如果會話 Tab 的播放按鈕旁沒有 speed-select，加上 conv-speed 選單 + `getConvSpeed()` / `updateConvSpeed()` 函式
+  3. **口說 Tab 速度控制**：如果口說 Tab 沒有 speak-speed 選單，加上 + `getSpeakSpeed()` 函式
+  4. **口說 Tab 對方台詞**：如果 speak-round 裡沒有 `.speak-transcript`，從 `speakPrompts` 陣列讀取對應文字，插入顯示區塊
+  5. **口說進度持久化**：如果沒有 `saveSpeakState` 函式，加上 localStorage 存取邏輯
+  6. **Tab 記憶**：如果 `switchTab` 函式裡沒有 `localStorage.setItem`，加上 Tab 切換記憶
+  7. **GPT prompt**：如果 system prompt 裡沒有 `IMPORTANT: "text" must always be in English`，更新 prompt
 
 ### 4. 顯示使用說明
 
