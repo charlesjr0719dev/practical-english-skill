@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<!-- pe-index-version: 3 -->
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practical English</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #ffffff; --surface: #ffffff; --surface-2: #f7f7f7;
+      --border: #e5e5e5; --text: #3c3c3c; --text-dim: #777777;
+      --accent: #1cb0f6; --success: #58cc02; --warn: #ff9600;
+      --danger: #ea2b2b; --accent-2: #ce82ff;
+      --success-light: #d7ffb8; --success-dark: #46a302;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito Sans', -apple-system, "PingFang TC", sans-serif;
+      font-size: 17px; line-height: 1.7; color: var(--text);
+      background: var(--bg); max-width: 720px; margin: 0 auto; padding: 32px 20px;
+    }
+    h1 { font-weight: 800; font-size: 28px; margin-bottom: 4px; }
+    h2 { font-weight: 800; font-size: 20px; margin-bottom: 16px; margin-top: 32px; }
+    .subtitle { color: var(--text-dim); font-size: 15px; margin-bottom: 32px; }
+
+    /* Type cards */
+    .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
+    .type-card {
+      border: 2px solid var(--border); border-radius: 16px; padding: 20px;
+      text-align: center; cursor: default;
+    }
+    .type-card.active { border-color: var(--accent); background: #f0f9ff; }
+    .type-emoji { font-size: 32px; margin-bottom: 8px; }
+    .type-name { font-weight: 800; font-size: 16px; margin-bottom: 4px; }
+    .type-desc { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+
+    /* Lesson list */
+    .lesson-card {
+      display: flex; align-items: center; gap: 16px;
+      border: 2px solid var(--border); border-radius: 16px; padding: 16px 20px;
+      margin-bottom: 12px; text-decoration: none; color: var(--text);
+      transition: all 0.15s;
+    }
+    .lesson-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .lesson-number {
+      font-weight: 800; font-size: 14px; color: white;
+      background: var(--accent); width: 40px; height: 40px;
+      border-radius: 12px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .lesson-info { flex: 1; }
+    .lesson-title { font-weight: 700; font-size: 16px; }
+    .lesson-meta { font-size: 13px; color: var(--text-dim); }
+
+    /* Tip box */
+    .tip-box {
+      background: #e8f4fd; border-radius: 16px; padding: 20px;
+      margin-bottom: 32px; font-size: 15px;
+    }
+    .tip-box strong { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <h1>Practical English</h1>
+  <p class="subtitle">實用英文學習 — 你的節奏，你決定</p>
+
+  <div class="tip-box">
+    每次練習可以自己選要包含哪些類型。<strong>預設只有「閱讀」</strong>——邊看邊聽、零壓力。<br>
+    覺得輕鬆了？告訴 Claude「加會話聽力」或「加文章聽力」，慢慢升級挑戰。
+  </div>
+
+  <div class="type-grid">
+    <div class="type-card active">
+      <div class="type-emoji">📖</div>
+      <div class="type-name">閱讀</div>
+      <div class="type-desc">文章＋對話<br>邊看邊聽，零壓力</div>
+    </div>
+    <div class="type-card active">
+      <div class="type-emoji">💬</div>
+      <div class="type-name">會話聽力</div>
+      <div class="type-desc">短對話<br>先聽再答題</div>
+    </div>
+    <div class="type-card active">
+      <div class="type-emoji">🎧</div>
+      <div class="type-name">文章聽力</div>
+      <div class="type-desc">長篇獨白<br>聽完抓重點</div>
+    </div>
+    <div class="type-card active">
+      <div class="type-emoji">🎤</div>
+      <div class="type-name">口說</div>
+      <div class="type-desc">自己開口<br>AI 即時回饋</div>
+    </div>
+  </div>
+
+  <h2>📚 練習列表</h2>
+
+  <!-- {{LESSON_CARDS}} -->
+
+  <div style="text-align:center; padding: 32px; color: var(--text-dim); font-size: 15px;">
+    告訴 Claude「練英文」或「下一個練習」生成更多課程
+  </div>
+
+  <div style="text-align:center; margin-bottom: 32px;">
+    <a href="review.html" style="display:inline-block; padding: 12px 28px; background: var(--accent-2); color: white; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 15px; box-shadow: 0 4px 0 #a855c7; transition: all 0.15s;">📚 複習收藏</a>
+  </div>
+
+</body>
+</html>

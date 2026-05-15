@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>複習收藏 — Practical English</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ffffff; --surface: #ffffff; --surface-2: #f7f7f7;
+  --border: #e5e5e5; --text: #3c3c3c; --text-dim: #777777;
+  --accent: #1cb0f6; --warn: #ff9600; --accent-2: #ce82ff;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Nunito Sans', -apple-system, "PingFang TC", sans-serif;
+  font-size: 17px; line-height: 1.7; color: var(--text);
+  background: var(--bg); max-width: 900px; margin: 0 auto; padding: 20px;
+}
+h1 { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+h2 { font-size: 20px; font-weight: 800; margin-bottom: 16px; }
+.subtitle { color: var(--text-dim); font-size: 14px; margin-bottom: 24px; }
+.back-link {
+  display: inline-block; margin-bottom: 16px; color: var(--accent);
+  font-weight: 700; font-size: 15px; text-decoration: none;
+}
+.back-link:hover { text-decoration: underline; }
+
+/* Filter */
+.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.filter-btn {
+  padding: 6px 16px; border-radius: 999px; border: 2px solid var(--border);
+  background: white; font-family: inherit; font-size: 13px; font-weight: 700;
+  color: var(--text-dim); cursor: pointer; transition: all 0.15s;
+}
+.filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+.filter-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+/* Collection */
+.collection-list { list-style: none; }
+.collection-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px;
+  margin-bottom: 10px; transition: all 0.15s;
+}
+.collection-item:hover { border-color: var(--accent); }
+.collection-play {
+  background: var(--accent); color: white; border: none;
+  min-width: 36px; min-height: 36px; border-radius: 12px; cursor: pointer;
+  font-size: 14px; font-weight: 700; box-shadow: 0 3px 0 #1899d6;
+  transition: all 0.15s; display: inline-flex; align-items: center;
+  justify-content: center; flex-shrink: 0;
+}
+.collection-play:hover { transform: translateY(1px); box-shadow: 0 2px 0 #1899d6; }
+.collection-play:active { transform: translateY(3px); box-shadow: none; }
+.collection-text { flex: 1; min-width: 0; }
+.collection-en { font-weight: 700; font-size: 16px; }
+.collection-zh { color: var(--text-dim); font-size: 14px; }
+.collection-tag {
+  background: var(--surface-2); border-radius: 999px; padding: 3px 10px;
+  font-size: 11px; font-weight: 700; color: var(--text-dim);
+  white-space: nowrap; flex-shrink: 0;
+}
+.collection-unstar {
+  background: none; border: none; font-size: 20px; cursor: pointer;
+  color: var(--warn); flex-shrink: 0; transition: transform 0.15s;
+}
+.collection-unstar:hover { transform: scale(1.2); }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); }
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: 15px; max-width: 360px; margin: 0 auto; }
+.collection-count { color: var(--text-dim); font-size: 14px; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<a class="back-link" href="index.html">← 回首頁</a>
+<h1>複習收藏</h1>
+<p class="subtitle">Practical English</p>
+
+<div class="filter-bar" id="filter-bar">
+  <button class="filter-btn active" data-filter="all" onclick="filterCollection('all')">全部</button>
+  <button class="filter-btn" data-filter="閱讀" onclick="filterCollection('閱讀')">📖 閱讀</button>
+  <button class="filter-btn" data-filter="會話" onclick="filterCollection('會話')">💬 會話</button>
+  <button class="filter-btn" data-filter="聽解" onclick="filterCollection('聽解')">🎧 聽解</button>
+  <button class="filter-btn" data-filter="口說" onclick="filterCollection('口說')">🎤 口說</button>
+</div>
+
+<div class="collection-count" id="collection-count"></div>
+<ul class="collection-list" id="collection-list"></ul>
+<div class="empty-state" id="empty-state" style="display:none;">
+  <div class="empty-icon">📚</div>
+  <p>還沒有收藏任何句型。<br>在練習中按 ☆ 就可以把喜歡的句型收藏到這裡。</p>
+</div>
+
+<script>
+let currentFilter = 'all';
+
+function renderCollection() {
+  const stars = JSON.parse(localStorage.getItem('pe_stars') || '[]');
+  const list = document.getElementById('collection-list');
+  const emptyState = document.getElementById('empty-state');
+  const countEl = document.getElementById('collection-count');
+
+  const filtered = currentFilter === 'all'
+    ? stars
+    : stars.filter(s => s.tab === currentFilter);
+
+  if (filtered.length === 0) {
+    list.innerHTML = '';
+    emptyState.style.display = 'block';
+    countEl.textContent = '';
+    return;
+  }
+
+  emptyState.style.display = 'none';
+  countEl.textContent = `共 ${filtered.length} 筆收藏`;
+
+  list.innerHTML = filtered.map(item => `
+    <li class="collection-item">
+      <button class="collection-play" onclick="speakText('${item.english.replace(/'/g, "\\'")}')">▶</button>
+      <div class="collection-text">
+        <div class="collection-en">${item.english}</div>
+        <div class="collection-zh">${item.chinese}</div>
+      </div>
+      <span class="collection-tag">${item.source} ${item.tab}</span>
+      <button class="collection-unstar" onclick="removeStar('${item.english.replace(/'/g, "\\'")}', '${item.source}')" title="取消收藏">⭐</button>
+    </li>
+  `).join('');
+}
+
+function filterCollection(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  renderCollection();
+}
+
+function removeStar(english, source) {
+  const stars = JSON.parse(localStorage.getItem('pe_stars') || '[]');
+  const idx = stars.findIndex(s => s.english === english && s.source === source);
+  if (idx >= 0) {
+    stars.splice(idx, 1);
+    localStorage.setItem('pe_stars', JSON.stringify(stars));
+    renderCollection();
+  }
+}
+
+function speakText(text) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'en-US';
+    utter.rate = 0.9;
+    window.speechSynthesis.speak(utter);
+  }
+}
+
+window.addEventListener('load', renderCollection);
+</script>
+</body>
+</html>

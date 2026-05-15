@@ -61,11 +61,13 @@ python3 -c "import edge_tts" 2>/dev/null && echo "OK" || echo "NEED_INSTALL"
   1. 在練習列表區新增 `lesson-card`（含課程連結、類型 emoji）
 
   **整頁重建步驟**（版本過舊時）：
-  1. 用 `ls` 掃描資料夾內所有 `PE-XXX/` 子目錄
-  2. 讀每個 `PE-XXX/*.html` 的 tab-bar，判斷該課包含哪些類型
-  3. 生成完整的 v3 index.html（純靜態、無星星、無 JavaScript）
-  4. 舊的 index.html 會被完全取代
-  5. **同時執行舊課程升級**（見下方）
+  1. 複製 `references/index-template.html` 作為基底
+  2. 用 `ls` 掃描資料夾內所有 `PE-XXX/` 子目錄
+  3. 讀每個 `PE-XXX/*.html` 的 tab-bar，判斷該課包含哪些類型
+  4. 把掃描結果生成 lesson cards，插入模板的 `<!-- {{LESSON_CARDS}} -->` 位置
+  5. 覆蓋舊的 index.html
+  6. 同時複製 `references/review-template.html` 覆蓋 `review.html`
+  7. **同時執行舊課程升級**（見下方）
 
   **舊課程自動升級**（版本重建時一併執行）：
   掃描所有 `PE-XXX/*.html`，對每個檔案檢查並修補：
