@@ -76,6 +76,7 @@ python3 -c "import edge_tts" 2>/dev/null && echo "OK" || echo "NEED_INSTALL"
   5. **口說進度持久化**：如果沒有 `saveSpeakState` 函式，加上 localStorage 存取邏輯
   6. **Tab 記憶**：如果 `switchTab` 函式裡沒有 `localStorage.setItem`，加上 Tab 切換記憶
   7. **GPT prompt**：如果 system prompt 裡沒有 `IMPORTANT: "text" must always be in English`，更新 prompt
+  8. **啟動檔 port 統一**：檢查練習資料夾內的 `啟動練習.bat`（Windows）或 `啟動練習.sh`（Mac），如果裡面的 port 不是 `9170`，全部替換成 `9170`
 
 ### 4. 顯示使用說明
 
