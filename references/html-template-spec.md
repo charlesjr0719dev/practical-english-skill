@@ -21,10 +21,12 @@
   <h1>PE-XXX [類別] [主題]</h1>
   <p class="subtitle">Practical English — [場景分類]</p>
   
-  <!-- Tab Bar -->
-  <!-- Tab 1: 會話 -->
-  <!-- Tab 2: 聽解 -->
-  <!-- Tab 3: 口說 -->
+  <!-- Tab Bar（只有一個類型時隱藏） -->
+  <!-- 依使用者選擇動態生成，可能的 Tab： -->
+  <!-- 📖 閱讀（含文章閱讀 + 對話閱讀兩個子區塊） -->
+  <!-- 💬 會話 -->
+  <!-- 🎧 聽解 -->
+  <!-- 🎤 口說 -->
   
   <!-- OpenAI API Key Modal -->
   
@@ -70,6 +72,20 @@
 .stop-btn.visible { display: flex; }
 ```
 
+### 閱讀 Tab 專用
+```css
+.reading-section { margin-top: 16px; }
+.reading-para, .reading-conv-line { padding: 16px; border-radius: 12px; margin-bottom: 12px; border: 2px solid var(--border); transition: background 0.3s, border-color 0.3s; }
+.reading-para.playing, .reading-conv-line.playing { background: #e8f4fd; border-color: var(--accent); }
+.para-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.para-label { font-size: 13px; color: var(--text-dim); font-weight: 700; }
+.reading-en { font-size: 17px; line-height: 1.8; margin-bottom: 6px; }
+.reading-zh { font-size: 15px; color: var(--text-dim); line-height: 1.6; }
+.reading-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.role-a { background: var(--accent); color: white; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+.role-b { background: var(--success); color: white; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+```
+
 ### 其他必要元件
 - `.scenario`：情境描述框（灰底圓角）
 - `.play-btn` / `.play-btn-large`：播放按鈕（Sky Blue 3D）
@@ -108,12 +124,91 @@ function playAudio(name) {
 }
 ```
 
+### 閱讀 Tab 播放（文章 + 對話，段落高亮）
+```javascript
+let readingAudio = null;
+
+// ===== 文章閱讀播放 =====
+function playReadingFull() {
+  stopAllReading();
+  readingAudio = new Audio('audio/listen-full.mp3');
+  applyReadingSpeed();
+  readingAudio.ontimeupdate = () => highlightCurrentPara(readingAudio.currentTime);
+  readingAudio.onended = () => clearAllHighlights();
+  readingAudio.play();
+}
+
+function playReadingPara(n) {
+  stopAllReading();
+  document.getElementById('read-p' + n).classList.add('playing');
+  readingAudio = new Audio('audio/listen-p' + n + '.mp3');
+  applyReadingSpeed();
+  readingAudio.onended = () => clearAllHighlights();
+  readingAudio.play();
+}
+
+function highlightCurrentPara(time) {
+  document.querySelectorAll('.reading-para').forEach(p => {
+    const start = parseFloat(p.dataset.start || 0);
+    const end = parseFloat(p.dataset.end || 9999);
+    p.classList.toggle('playing', time >= start && time < end);
+  });
+}
+
+// ===== 對話閱讀播放 =====
+function playConvFull() {
+  stopAllReading();
+  readingAudio = new Audio('audio/conv-full.mp3');
+  applyReadingSpeed();
+  readingAudio.ontimeupdate = () => highlightCurrentConvLine(readingAudio.currentTime);
+  readingAudio.onended = () => clearAllHighlights();
+  readingAudio.play();
+}
+
+function playConvLine(n) {
+  stopAllReading();
+  document.getElementById('read-conv-' + n).classList.add('playing');
+  readingAudio = new Audio('audio/conv-' + n + '.mp3');
+  applyReadingSpeed();
+  readingAudio.onended = () => clearAllHighlights();
+  readingAudio.play();
+}
+
+function highlightCurrentConvLine(time) {
+  document.querySelectorAll('.reading-conv-line').forEach(line => {
+    const start = parseFloat(line.dataset.start || 0);
+    const end = parseFloat(line.dataset.end || 9999);
+    line.classList.toggle('playing', time >= start && time < end);
+  });
+}
+
+// ===== 共用工具 =====
+function stopAllReading() {
+  if (readingAudio) readingAudio.pause();
+  clearAllHighlights();
+}
+
+function clearAllHighlights() {
+  document.querySelectorAll('.reading-para, .reading-conv-line').forEach(el => el.classList.remove('playing'));
+}
+
+function applyReadingSpeed() {
+  const speed = document.getElementById('reading-speed');
+  if (speed && readingAudio) readingAudio.playbackRate = parseFloat(speed.value);
+}
+
+function updateReadingSpeed() {
+  if (readingAudio) readingAudio.playbackRate = parseFloat(document.getElementById('reading-speed').value);
+}
+```
+
 ### 會話 Tab 提交
 - 記錄選擇 → 對答案 → 標色（correct/wrong）→ 解鎖原文 → `saveProgress('conversation')`
 
 ### 聽解 Tab 提交
 - 同會話，4 題 → 解鎖原文 → `saveProgress('listening')`
 - 速度控制：`currentAudio.playbackRate = parseFloat(speed)`
+- 所有速度選單統一提供五檔：`0.25x / 0.5x / 0.7x / 1.0x（預設） / 1.2x`
 
 ### 語音辨識（口說 Tab）
 
@@ -220,17 +315,16 @@ async function submitSpeaking(round) {
 ```
 
 ### 進度儲存
+
+**重要**：新版一律用 `types` key 儲存。讀取時同時相容舊版 `tabs` key（`info.types || {}` + `info.tabs || {}`）。
+
 ```javascript
-function saveProgress(tab) {
+function saveProgress(type) {
   const progress = JSON.parse(localStorage.getItem('pe_progress') || '{}');
-  if (!progress['PE-XXX']) {
-    progress['PE-XXX'] = { category: '...', title: '...', tabs: {} };
-  }
-  if (!progress['PE-XXX'].tabs[tab]) {
-    progress['PE-XXX'].tabs[tab] = { completed_at: new Date().toISOString() };
-    localStorage.setItem('pe_progress', JSON.stringify(progress));
-  }
-  updateTabStatus(tab, true);
+  if (!progress['PE-XXX']) progress['PE-XXX'] = { types: {} };
+  progress['PE-XXX'].types[type] = true;
+  localStorage.setItem('pe_progress', JSON.stringify(progress));
+  updateStatus(type, true);
 }
 ```
 
@@ -284,6 +378,9 @@ function retryTab(tab) {
 每個 Tab 結尾留兩個空的 div，供 Claude 事後補充寫入：
 
 ```html
+<div id="supplement-reading-vocab"></div>
+<div id="supplement-reading-grammar"></div>
+
 <div id="supplement-conversation-vocab"></div>
 <div id="supplement-conversation-grammar"></div>
 ```
